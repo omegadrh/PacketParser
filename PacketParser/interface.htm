@@ -7,6 +7,7 @@
         //graciously taken from http://www.captain.at/howto-ajax-process-xml.php
         //and modified for our needs
         var http_request = false;
+        var sortCol = -1;
 
         function makeRequest(url, parameters) {
             http_request = false;
@@ -38,7 +39,7 @@
                 if (http_request.status == 200) {
 
                     var xmldoc = http_request.responseXML;
-                    var statsTable = document.getElementById('stats');
+                    var statsTable = document.getElementById('statsbody');
                     var packets = xmldoc.getElementsByTagName('stats').item(0).childNodes;
                     //alert('length: ' + packets.length);
                     for (var i = 0 ; i < packets.length ; i++)
@@ -58,6 +59,28 @@
         }
         //end code taken from http://www.captain.at/howto-ajax-process-xml.php
 
+        function sortTable(colNumber)
+        {
+            var statsbody = document.getElementById('statsbody');
+            var rows = statsbody.getElementsByTagName('tr');
+            //rows.sort(function (a, b) { return a.cells[colNumber].textContent - b.cells[colNumber].textContent })
+            var rowsToSort = [];
+            for (var i = 0 ; i < rows.length ; i++)
+            {
+                rowsToSort.push([rows[i].cells[colNumber].textContent, rows[i].cloneNode(true)]);
+            }
+            rowsToSort.sort(function (a, b) { return parseInt(a[0], 16) - parseInt(b[0], 16) });
+            if (colNumber == sortCol)
+                rowsToSort.reverse();
+            statsbody.innerHTML = '';
+            for (var i = 0 ; i < rowsToSort.length ; i++)
+            {
+                statsbody.appendChild(rowsToSort[i][1]);
+            }
+            sortCol = colNumber;
+
+        }
+
         window.onload = makeRequest('/parser/PacketParser.exe', '');
     </script>
 </head>
@@ -66,10 +89,11 @@
     <table id="stats">
         <thead>
             <tr>
-                <td>Packet Type</td>
-                <td>Count</td>
+                <td onclick="sortTable(0);">Packet Type</td>
+                <td onclick="sortTable(1);">Count</td>
             </tr>
         </thead>
+        <tbody id="statsbody"></tbody>
     </table>
 
 
