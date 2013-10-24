@@ -24,15 +24,18 @@ bool checkArgs(int argc, char* argv[], char** inFile, outFormat &out, int &rowSt
 	{
 		std::string tmpFile;
 		//printf("No input file specified\n");
-#ifdef _DEBUG
+//#ifdef _DEBUG
+#if 1
 		*inFile = _strdup("c:\\Users\\David\\Documents\\packets.txt");
-		out = TEXT;
+		out = XML;
 #else
 		std::cout << "Filename: ";
 		std::getline(std::cin, tmpFile);
 		*inFile = _strdup(tmpFile.c_str());
 #endif
+#ifdef _DEBUG
 		printf("inFile is %s\n", *inFile);
+#endif
 		return true;
 		//return false;	//needs an input file
 	}
@@ -157,12 +160,16 @@ int parseFile(char *fileName, int startRow, int endRow, packets &packetList)
 
 int outputInfo(packets &packetList, outFormat format)
 {
+	if (format == XML)
+		printf("<stats>\n");
+
 	for (std::multimap<unsigned short int, packet*>::iterator it = packetList.field1map.begin(); it != packetList.field1map.end(); ++it)
 	{
 		int count = packetList.field1map.count(it->first);
 		switch (format)
 		{
 		case XML:
+			printf("<packets type=\"%03x\" count=\"%d\" />\n", it->first, count);
 			break;
 		case CSV:
 			break;
@@ -177,6 +184,9 @@ int outputInfo(packets &packetList, outFormat format)
 		for (int i = 1; i < count; i++)
 			++it;
 	}
+	if (format == XML)
+		printf("</stats>\n");
+
 	return 0;
 }
 
@@ -188,6 +198,8 @@ int _tmain(int argc, char* argv[])
 	int rowStart = -1;
 	int rowEnd = -1;
 	packets parsedList;
+
+	printf("Content-Type: text/xml\n\n");
 
 	if (!checkArgs(argc, argv, &inFile, format, rowStart, rowEnd))
 	{

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>PacketParser Interface</title>
+    <script type="text/javascript">
+
+        //graciously taken from http://www.captain.at/howto-ajax-process-xml.php
+        //and modified for our needs
+        var http_request = false;
+
+        function makeRequest(url, parameters) {
+            http_request = false;
+            if (window.XMLHttpRequest) { // Mozilla, Safari,...
+                http_request = new XMLHttpRequest();
+                if (http_request.overrideMimeType) {
+                    http_request.overrideMimeType('text/xml');
+                }
+            } else if (window.ActiveXObject) { // IE
+                try {
+                    http_request = new ActiveXObject("Msxml2.XMLHTTP");
+                } catch (e) {
+                    try {
+                        http_request = new ActiveXObject("Microsoft.XMLHTTP");
+                    } catch (e) { }
+                }
+            }
+            if (!http_request) {
+                alert('Cannot create XMLHTTP instance');
+                return false;
+            }
+            http_request.onreadystatechange = printStats;
+            http_request.open('GET', url + parameters, true);
+            http_request.send(null);
+        }
+
+        function printStats() {
+            if (http_request.readyState == 4) {
+                if (http_request.status == 200) {
+
+                    var xmldoc = http_request.responseXML;
+                    var statsTable = document.getElementById('stats');
+                    var packets = xmldoc.getElementsByTagName('stats').item(0).childNodes;
+                    //alert('length: ' + packets.length);
+                    for (var i = 0 ; i < packets.length ; i++)
+                    {
+                        //alert(i);
+                        var packet = packets.item(i);
+                        if (packet.nodeType != 1)
+                            continue;
+                        var attributes = packet.attributes;
+                        //alert('type: ' + attributes.getNamedItem("type").value);
+                        statsTable.insertAdjacentHTML('beforeend', "<tr><td>" + attributes.getNamedItem("type").value + "</td>\n<td>" + attributes.getNamedItem("count").value + "</td>\n</tr>");
+                    }
+                } else {
+                    alert('There was a problem with the request.');
+                }
+            }
+        }
+        //end code taken from http://www.captain.at/howto-ajax-process-xml.php
+
+        window.onload = makeRequest('/parser/PacketParser.exe', '');
+    </script>
+</head>
+<body>
+    <h1>Packet statistics</h1>
+    <table id="stats">
+        <thead>
+            <tr>
+                <td>Packet Type</td>
+                <td>Count</td>
+            </tr>
+        </thead>
+    </table>
+
+
+</body>
+</html>
