@@ -1,4 +1,6 @@
 // PacketParser.cpp : Defines the entry point for the console application.
+// Author: David R. Hedges
+// Web site: http://www.p14nd4.com/
 //
 
 #include "stdafx.h"
@@ -173,6 +175,20 @@ packet * parseLine(char *line)
 
 int parseFile(char *fileName, int startRow, int endRow, packets &packetList)
 {
+	//expects an ANSI text file like this:
+	/*
+001 03 06 15712598721459087
+0f2 9d a0 6712457896645689
+001 04 05 26472469874510987451
+001 03 05 6740895743987
+020 9b 9c 56748958109847
+76d a1 06 19346578123957123097
+0f2 9d a1 610357125349087124690871235
+
+	We're pretending that the first field is a 'packet type' identifier, the second and third columns are 
+	other headers we don't do anything with, and the last is data payload (also don't do anything with it)
+	*/
+
 	FILE *stream;
 	errno_t err;
 	char *dest = (char *)malloc(MAXPACKETSIZE);
