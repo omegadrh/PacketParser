@@ -85,9 +85,13 @@
             {
                 rowsToSort.push([rows[i].cells[colNumber].textContent, rows[i].cloneNode(true)]);
             }
-            rowsToSort.sort(function (a, b) { return parseInt(a[0], 16) - parseInt(b[0], 16) });
             if (colNumber == sortCol)
-                rowsToSort.reverse();
+            {
+                    rowsToSort.reverse();
+            }
+            else
+                rowsToSort.sort(function (a, b) { return parseInt(a[0], 16) - parseInt(b[0], 16) });
+
             statsbody.innerHTML = '';
             for (var i = 0 ; i < rowsToSort.length ; i++)
             {
@@ -130,6 +134,7 @@
     <p><a href="#" onclick="getNextRows(-1)">&laquo; Previous</a> - <a href="#" onclick="getNextRows(0);">All</a> - <a href="#" onclick="getNextRows(1)">Next &raquo;</a></p>
     <p id="allRows" style="display: none;">Displaying stats for all rows in file.</p>
     <p id="rowNums">Displaying stats for rows <span id="rowStart">0</span> - <span id="rowEnd">0</span></p>
+    <p style="font-size: smaller;">Click column headings to sort</p>
     <table id="stats">
         <thead>
             <tr>
