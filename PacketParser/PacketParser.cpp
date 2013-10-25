@@ -177,6 +177,7 @@ int parseFile(char *fileName, int startRow, int endRow, packets &packetList)
 	errno_t err;
 	char *dest = (char *)malloc(MAXPACKETSIZE);
 	packet* pak;
+	int lineNumber = 0;
 
 	err = fopen_s(&stream, fileName, "rt");
 	if (err != 0)
@@ -187,9 +188,17 @@ int parseFile(char *fileName, int startRow, int endRow, packets &packetList)
 	}
 	while (fgets(dest, MAXPACKETSIZE, stream))
 	{
+		if (startRow > lineNumber)
+		{
+			lineNumber++;
+			continue;
+		}
+		if (endRow > -1 && lineNumber > endRow)
+			break;
 		pak = parseLine(dest);
 		packetList.packetList.push_back(pak);
 		packetList.field1map.insert(std::pair<unsigned short int, packet *>(pak->field1, pak));
+		lineNumber++;
 	}
 /*	err = fread_s(dest, MAXPACKETSIZE, 1, MAXPACKETSIZE, stream);
 	if (err == 0)
@@ -203,6 +212,14 @@ int parseFile(char *fileName, int startRow, int endRow, packets &packetList)
 	fclose(stream);
 	free(dest);
 	return 0;
+}
+
+void testParseFile()
+{
+	packets results;
+	//parseFile("c:\\Users\\David\\Documents\\packets.txt", -1, -1, results);
+	//parseFile("c:\\Users\\David\\Documents\\packets.txt", -1, 30, results);
+	parseFile("c:\\Users\\David\\Documents\\packets.txt", 2, 4, results);
 }
 
 int outputInfo(packets &packetList, outFormat format)
@@ -248,6 +265,7 @@ int _tmain(int argc, char* argv[])
 
 #ifdef _DEBUG
 	testparseQueryString();
+	testParseFile();
 #endif
 
 	printf("Content-Type: text/xml\n\n");

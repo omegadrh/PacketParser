@@ -9,7 +9,8 @@
         var http_request = false;
         var sortCol = -1;
         var rowStart = 0;
-        var rowEnd = 19;
+        var rowEnd = 3;
+        var diff = rowEnd - rowStart;
 
         function makeRequest(url, parameters) {
             http_request = false;
@@ -46,7 +47,6 @@
                     //alert('length: ' + packets.length);
                     for (var i = 0 ; i < packets.length ; i++)
                     {
-                        //alert(i);
                         var packet = packets.item(i);
                         if (packet.nodeType != 1)
                             continue;
@@ -54,6 +54,8 @@
                         //alert('type: ' + attributes.getNamedItem("type").value);
                         statsTable.insertAdjacentHTML('beforeend', "<tr><td>" + attributes.getNamedItem("type").value + "</td>\n<td>" + attributes.getNamedItem("count").value + "</td>\n</tr>");
                     }
+                    document.getElementById("rowStart").innerText = rowStart;
+                    document.getElementById("rowEnd").innerText = rowEnd;
                 } else {
                     alert('There was a problem with the request.');
                 }
@@ -83,11 +85,38 @@
 
         }
 
-        window.onload = makeRequest('/parser/PacketParser.exe', '?rowStart=0&rowEnd=19');
+        function getNextRows(forward)
+        {
+            document.getElementById('statsbody').innerHTML = "";
+            if (forward>0)
+            {
+                rowStart = rowEnd + 1;
+                rowEnd += (diff + 1);
+            }
+            else if (forward < 0)
+            {
+                if (rowStart - (diff + 1) >= 0)
+                {
+                    rowEnd = rowStart - 1;
+                    rowStart -= (diff + 1);
+                }
+            }
+            else
+            {
+                //all
+                rowEnd = -1;
+                rowStart = -1;
+            }
+            makeRequest('/parser/PacketParser.exe', '?rowStart=' + rowStart + '&rowEnd=' + rowEnd)
+        }
+
+        window.onload = makeRequest('/parser/PacketParser.exe', '?rowStart=' + rowStart + '&rowEnd=' + rowEnd)
     </script>
 </head>
 <body>
     <h1>Packet statistics</h1>
+    <a onclick="getNextRows(-1)">&laquo; Previous</a> - <a onclick="getNextRows(0);">All</a> - <a onclick="    getNextRows(1)">Next &raquo;</a>
+    <p>Displaying stats for rows <span id="rowStart">0</span> - <span id="rowEnd">0</span></p>
     <table id="stats">
         <thead>
             <tr>
