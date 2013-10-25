@@ -8,6 +8,8 @@
         //and modified for our needs
         var http_request = false;
         var sortCol = -1;
+        var rowStart = 0;
+        var rowEnd = 19;
 
         function makeRequest(url, parameters) {
             http_request = false;
@@ -81,7 +83,7 @@
 
         }
 
-        window.onload = makeRequest('/parser/PacketParser.exe', '');
+        window.onload = makeRequest('/parser/PacketParser.exe', '?rowStart=0&rowEnd=19');
     </script>
 </head>
 <body>

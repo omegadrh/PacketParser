@@ -7,6 +7,13 @@
 #include <stdio.h>
 #include <deque>
 #include <map>
+//#include <SDKDDKVer.h>
+#if 0 //  NTDDI_VERSION >= _WIN32_WINNT_WIN8
+#include <Processenv.h> //for win8 or server 2012
+#else
+#include <Windows.h>
+#endif
+#include <assert.h>
 
 #define MAXPACKETSIZE 9000
 
@@ -18,8 +25,43 @@ enum outFormat
 	TEXT
 };
 
+int parseQueryString(char *env, int &rowStart, int &rowEnd)
+{
+	//queryString should be something like rowStart=0&rowEnd=19
+	const char sep[] = "&";
+	char *tok = NULL;
+	char *nextTok = NULL;
+	char *tok2 = NULL;
+	char *nextTok2 = NULL;
+	char *stop = NULL;
+	char *copy = _strdup(env);
+
+	tok = strtok_s(copy, sep, &nextTok);
+	while (tok != NULL)
+	{
+		tok2 = strtok_s(tok, "=", &nextTok2);
+
+		if (strcmp(tok, "rowStart") == 0)
+			rowStart = atoi(strtok_s(NULL, "=", &nextTok2));
+		else if (strcmp(tok, "rowEnd") == 0)
+			rowEnd = atoi(strtok_s(NULL, "=", &nextTok2));
+
+		tok = strtok_s(NULL, sep, &nextTok);
+	}
+
+	return 0;
+}
+
+void testparseQueryString()
+{
+	int rowStart=-1, rowEnd=-1;
+	parseQueryString("rowStart=0&rowEnd=19", rowStart, rowEnd);
+	assert(rowStart == 0 && rowEnd == 19);
+}
+
 bool checkArgs(int argc, char* argv[], char** inFile, outFormat &out, int &rowStart, int &rowEnd)
 {
+	char env[256];
 	if (argc < 2)
 	{
 		std::string tmpFile;
@@ -27,6 +69,11 @@ bool checkArgs(int argc, char* argv[], char** inFile, outFormat &out, int &rowSt
 //#ifdef _DEBUG
 #if 1
 		*inFile = _strdup("c:\\Users\\David\\Documents\\packets.txt");
+		if (GetEnvironmentVariableA("QUERY_STRING", env, 256))
+		{
+			//printf("<query>%s</query>\n", env);
+			parseQueryString(env, rowStart, rowEnd);
+		}
 		out = XML;
 #else
 		std::cout << "Filename: ";
@@ -198,6 +245,10 @@ int _tmain(int argc, char* argv[])
 	int rowStart = -1;
 	int rowEnd = -1;
 	packets parsedList;
+
+#ifdef _DEBUG
+	testparseQueryString();
+#endif
 
 	printf("Content-Type: text/xml\n\n");
 
