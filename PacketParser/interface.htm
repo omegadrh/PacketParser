@@ -54,8 +54,20 @@
                         //alert('type: ' + attributes.getNamedItem("type").value);
                         statsTable.insertAdjacentHTML('beforeend', "<tr><td>" + attributes.getNamedItem("type").value + "</td>\n<td>" + attributes.getNamedItem("count").value + "</td>\n</tr>");
                     }
-                    document.getElementById("rowStart").innerText = rowStart;
-                    document.getElementById("rowEnd").innerText = rowEnd;
+                    var allRows = document.getElementById('allRows');
+                    var rowNums = document.getElementById('rowNums');
+                    if (rowStart == -1 && rowEnd == -1)
+                    {
+                        allRows.style.display = "inline";
+                        rowNums.style.display = "none";
+                    }
+                    else
+                    {
+                        allRows.style.display = "none";
+                        rowNums.style.display = "inline";
+                        document.getElementById('rowStart').innerText = rowStart;
+                        document.getElementById('rowEnd').innerText = rowEnd;
+                    }
                 } else {
                     alert('There was a problem with the request.');
                 }
@@ -115,8 +127,9 @@
 </head>
 <body>
     <h1>Packet statistics</h1>
-    <a onclick="getNextRows(-1)">&laquo; Previous</a> - <a onclick="getNextRows(0);">All</a> - <a onclick="    getNextRows(1)">Next &raquo;</a>
-    <p>Displaying stats for rows <span id="rowStart">0</span> - <span id="rowEnd">0</span></p>
+    <p><a href="#" onclick="getNextRows(-1)">&laquo; Previous</a> - <a href="#" onclick="getNextRows(0);">All</a> - <a href="#" onclick="getNextRows(1)">Next &raquo;</a></p>
+    <p id="allRows" style="display: none;">Displaying stats for all rows in file.</p>
+    <p id="rowNums">Displaying stats for rows <span id="rowStart">0</span> - <span id="rowEnd">0</span></p>
     <table id="stats">
         <thead>
             <tr>
